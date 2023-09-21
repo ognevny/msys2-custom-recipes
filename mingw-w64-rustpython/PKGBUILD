@@ -14,6 +14,7 @@ license=('spdx:MIT')
 makedepends=("${MINGW_PACKAGE_PREFIX}-rust"
              "${MINGW_PACKAGE_PREFIX}-python"
              "${MINGW_PACKAGE_PREFIX}-openssl"
+             "${MINGW_PACKAGE_PREFIX}-pkgconf"
              'git')
 depends=("${MINGW_PACKAGE_PREFIX}-openssl")
 source=("${_realname}::git+${url}#commit=${_commit}")
