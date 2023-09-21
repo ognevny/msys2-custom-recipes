@@ -1,0 +1,56 @@
+# Maintainer: Maksim Bondarenkov <maksapple2306@gmail.com>
+
+_realname=gitoxide
+pkgbase=mingw-w64-${_realname}
+pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}"
+pkgver=0.29.0
+pkgrel=1
+pkgdesc="An idiomatic, lean, fast & safe pure Rust implementation of Git (mingw-w64)"
+arch=('any')
+mingw_arch=('mingw32' 'mingw64' 'ucrt64' 'clang32' 'clang64' 'clangarm64')
+url="https://github.com/Byron/gitoxide"
+license=('spdx:Apache-2.0 OR MIT')
+makedepends=("${MINGW_PACKAGE_PREFIX}-rust" "${MINGW_PACKAGE_PREFIX}-cmake")
+source=("${url}/archive/v${pkgver}/${_realname}-${pkgver}.tar.gz")
+sha256sums=('9ef3a8fc44ae28ad17ccff393ed0d46e2d117f1090c8f31cd3a4fb3d7a975d5d')
+noextract=("${_realname}-${pkgver}.tar.gz")
+
+prepare() {
+  cd "${srcdir}"
+  tar -xf "${_realname}-${pkgver}.tar.gz"
+  cp -r "${_realname}-${pkgver}" "build-${MSYSTEM}" && cd "build-${MSYSTEM}"
+
+  local _target="${CARCH}-pc-windows-gnu"
+  if [[ $MINGW_PACKAGE_PREFIX == *-clang-aarch64 ]]; then
+    _target="${CARCH}-pc-windows-gnullvm"
+  fi
+
+  cargo fetch --locked --target "${_target}"
+}
+
+build() {
+  cd "${srcdir}/build-${MSYSTEM}"
+
+  cargo build --release --locked --no-default-features --features max-pure
+}
+
+check() {
+  cd "${srcdir}/build-${MSYSTEM}"
+
+  cargo test --release --locked --no-default-features --features max-pure
+}
+
+package() {
+  cd "${srcdir}/build-${MSYSTEM}"
+
+  cargo install \
+    --frozen \
+    --offline \
+    --no-track \
+    --no-default-features \
+    --features max-pure \
+    --path . \
+    --root "${pkgdir}${MINGW_PREFIX}"
+
+  install -Dm644 LICENSE-{APACHE,MIT} -t "${pkgdir}${MINGW_PREFIX}/share/licenses/${_realname}/"
+}
