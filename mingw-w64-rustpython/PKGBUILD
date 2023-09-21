@@ -11,7 +11,10 @@ arch=('any')
 mingw_arch=('mingw32' 'mingw64' 'ucrt64' 'clang32' 'clang64' 'clangarm64')
 url="https://github.com/RustPython/RustPython"
 license=('spdx:MIT')
-makedepends=("${MINGW_PACKAGE_PREFIX}-rust" "${MINGW_PACKAGE_PREFIX}-python" 'git')
+makedepends=("${MINGW_PACKAGE_PREFIX}-rust"
+             "${MINGW_PACKAGE_PREFIX}-python"
+             "${MINGW_PACKAGE_PREFIX}-openssl"
+             'git')
 depends=("${MINGW_PACKAGE_PREFIX}-openssl")
 source=("${_realname}::git+${url}#commit=${_commit}")
 sha256sums=('SKIP')
