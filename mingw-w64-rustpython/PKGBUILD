@@ -1,0 +1,62 @@
+# Maintainer: Maksim Bondarenkov <maksapple2306@gmail.com>
+
+_realname=rustpython
+_commit=21cff29c31c127b69eb5b8899452c09f4ede4a56
+pkgbase=mingw-w64-${_realname}
+pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}"
+pkgver=r13315.21cff29c3
+pkgrel=1
+pkgdesc="A Python Interpreter written in Rust (mingw-w64)"
+arch=('any')
+mingw_arch=('mingw32' 'mingw64' 'ucrt64' 'clang32' 'clang64' 'clangarm64')
+url="https://github.com/RustPython/RustPython"
+license=('spdx:MIT')
+makedepends=("${MINGW_PACKAGE_PREFIX}-rust" "${MINGW_PACKAGE_PREFIX}-python" 'git')
+depends=("${MINGW_PACKAGE_PREFIX}-openssl")
+source=("${_realname}::git+${url}#commit=${_commit}")
+sha256sums=('SKIP')
+
+pkgver() {
+  cd "${srcdir}/${_realname}"
+  printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+prepare() {
+  cd "${srcdir}/${_realname}"
+
+  local _target="${CARCH}-pc-windows-gnu"
+  if [[ $MINGW_PACKAGE_PREFIX == *-clang-aarch64 ]]; then
+    _target="${CARCH}-pc-windows-gnullvm"
+  fi
+
+  cargo fetch --locked --target "${_target}"
+}
+
+build() {
+  cd "${srcdir}/${_realname}"
+
+  WINAPI_NO_BUNDLED_LIBRARIES=1 \
+    cargo build --release --locked --features ssl
+}
+
+check() {
+  cd "${srcdir}/${_realname}"
+
+  WINAPI_NO_BUNDLED_LIBRARIES=1 \
+    cargo test --release --locked --features ssl
+}
+
+package() {
+  cd "${srcdir}/${_realname}"
+
+  WINAPI_NO_BUNDLED_LIBRARIES=1 \
+    cargo install \
+      --frozen \
+      --offline \
+      --no-track \
+      --features ssl \
+      --path . \
+      --root "${pkgdir}${MINGW_PREFIX}"
+
+  install -Dm644 LICENSE "${pkgdir}${MINGW_PREFIX}/share/licenses/${_realname}/LICENSE"
+}
