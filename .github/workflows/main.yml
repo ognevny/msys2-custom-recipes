@@ -50,7 +50,7 @@ jobs:
           maximum-size: 16GB
           disk-root: "C:"
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           path: temp
           fetch-depth: 0
@@ -124,7 +124,7 @@ jobs:
     needs: [build]
     runs-on: windows-2022
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v3
         continue-on-error: true
         with:
