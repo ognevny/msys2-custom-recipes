@@ -1,10 +1,10 @@
 # Maintainer: Maksim Bondarenkov <maksapple2306@gmail.com>
 
 _realname=rustpython
-_commit=21cff29c31c127b69eb5b8899452c09f4ede4a56
+_commit=9031a0ac9fdfc194f239229dedb9bcbc5478b64f
 pkgbase=mingw-w64-${_realname}
 pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}"
-pkgver=r13315.21cff29c3
+pkgver=r13318.9031a0ac9
 pkgrel=1
 pkgdesc="A Python Interpreter written in Rust (mingw-w64)"
 arch=('any')
@@ -12,11 +12,11 @@ mingw_arch=('mingw32' 'mingw64' 'ucrt64' 'clang32' 'clang64' 'clangarm64')
 url="https://github.com/RustPython/RustPython"
 license=('spdx:MIT')
 makedepends=("${MINGW_PACKAGE_PREFIX}-rust"
-             "${MINGW_PACKAGE_PREFIX}-python"
              "${MINGW_PACKAGE_PREFIX}-openssl"
              "${MINGW_PACKAGE_PREFIX}-pkgconf"
+             "${MINGW_PACKAGE_PREFIX}-python"
              'git')
-depends=("${MINGW_PACKAGE_PREFIX}-openssl")
+depends=("${MINGW_PACKAGE_PREFIX}-openssl" "${MINGW_PACKAGE_PREFIX}-bzip2")
 source=("${_realname}::git+${url}#commit=${_commit}")
 sha256sums=('SKIP')
 
@@ -33,6 +33,7 @@ prepare() {
     _target="${CARCH}-pc-windows-gnullvm"
   fi
 
+  cargo update -p windows-targets@0.48.0 --precise 0.48.1
   cargo fetch --locked --target "${_target}"
 }
 
@@ -40,14 +41,14 @@ build() {
   cd "${srcdir}/${_realname}"
 
   WINAPI_NO_BUNDLED_LIBRARIES=1 \
-    cargo build --release --locked --features ssl
+    cargo build --release --locked --features "bz2 jit ssl"
 }
 
 check() {
   cd "${srcdir}/${_realname}"
 
   WINAPI_NO_BUNDLED_LIBRARIES=1 \
-    cargo test --release --locked --features ssl
+    cargo test --release --locked --features "bz2 jit ssl"
 }
 
 package() {
@@ -58,7 +59,7 @@ package() {
       --frozen \
       --offline \
       --no-track \
-      --features ssl \
+      --features "bz2 jit ssl" \
       --path . \
       --root "${pkgdir}${MINGW_PREFIX}"
 
