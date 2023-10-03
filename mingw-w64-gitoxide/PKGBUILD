@@ -3,7 +3,7 @@
 _realname=gitoxide
 pkgbase=mingw-w64-${_realname}
 pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}"
-pkgver=0.29.0
+pkgver=0.30.0
 pkgrel=1
 pkgdesc="An idiomatic, lean, fast & safe pure Rust implementation of Git (mingw-w64)"
 arch=('any')
@@ -12,13 +12,13 @@ url="https://github.com/Byron/gitoxide"
 license=('spdx:Apache-2.0 OR MIT')
 makedepends=("${MINGW_PACKAGE_PREFIX}-rust" "${MINGW_PACKAGE_PREFIX}-cmake")
 source=("${url}/archive/v${pkgver}/${_realname}-${pkgver}.tar.gz")
-sha256sums=('9ef3a8fc44ae28ad17ccff393ed0d46e2d117f1090c8f31cd3a4fb3d7a975d5d')
+sha256sums=('779a2203d05c6856c5820f0b97dd384fc9689129213b8b78f27283d6b5ca94c1')
 noextract=("${_realname}-${pkgver}.tar.gz")
 
 prepare() {
   cd "${srcdir}"
   tar -xf "${_realname}-${pkgver}.tar.gz"
-  cp -r "${_realname}-${pkgver}" "build-${MSYSTEM}" && cd "build-${MSYSTEM}"
+  cd "${_realname}-${pkgver}"
 
   local _target="${CARCH}-pc-windows-gnu"
   if [[ $MINGW_PACKAGE_PREFIX == *-clang-aarch64 ]]; then
@@ -29,19 +29,19 @@ prepare() {
 }
 
 build() {
-  cd "${srcdir}/build-${MSYSTEM}"
+  cd "${srcdir}/${_realname}-${pkgver}"
 
   cargo build --release --locked --no-default-features --features max-pure
 }
 
 check() {
-  cd "${srcdir}/build-${MSYSTEM}"
+  cd "${srcdir}/${_realname}-${pkgver}"
 
   cargo test --release --locked --no-default-features --features max-pure
 }
 
 package() {
-  cd "${srcdir}/build-${MSYSTEM}"
+  cd "${srcdir}/${_realname}-${pkgver}"
 
   cargo install \
     --frozen \
