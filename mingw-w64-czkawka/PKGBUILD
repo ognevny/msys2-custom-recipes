@@ -33,6 +33,7 @@ prepare() {
 build() {
   cd "${srcdir}/${_realname}-${pkgver}"
 
+  export PKG_CONFIG_PATH="${MINGW_PREFIX}/lib/pkgconf"
   cargo build --bin czkawka_cli --release --features heif
   cargo build --bin czkawka_gui --release --features heif
 }
