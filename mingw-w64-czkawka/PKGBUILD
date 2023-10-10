@@ -13,7 +13,8 @@ mingw_arch=('mingw32' 'mingw64' 'ucrt64' 'clang32' 'clang64' 'clangarm64')
 license=('spdx:MIT AND CC-BY-4.0')
 makedepends=("${MINGW_PACKAGE_PREFIX}-rust"
              "${MINGW_PACKAGE_PREFIX}-gtk4"
-             "${MINGW_PACKAGE_PREFIX}-libheif")
+             "${MINGW_PACKAGE_PREFIX}-libheif"
+             "${MINGW_PACKAGE_PREFIX}-pkgconf")
 source=("${_realname}-${pkgver}.tar.gz::https://github.com/qarmin/czkawka/archive/refs/tags/${pkgver}.tar.gz")
 sha256sums=('32dc1d8a55bc3ce478246830a1f81679affa85735e69aa049fd83e30271e368f')
 
