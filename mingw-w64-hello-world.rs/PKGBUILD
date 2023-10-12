@@ -1,0 +1,42 @@
+# Maintainer: Maksim Bondarenkov <maksapple2306@gmail.com>
+
+_realname=hello-world.rs
+_commit=2795222b102be8bba8928cc0c131580c8c9e67ee
+pkgbase=mingw-w64-${_realname%.*}
+pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}-git"
+pkgver=0.1.0.r356.2795222
+pkgrel=1
+arch=('any')
+url="https://github.com/mTvare6/hello-world.rs"
+pkgdesc="Memory safe, blazing fast, configurable, minimal hello world written in rust under 1 line of code with few dependencies (mingw-w64)"
+license=('custom')
+makedepends=("${MINGW_PACKAGE_PREFIX}-rust"
+             "${MINGW_PACKAGE_PREFIX}-cmake"
+             "${MINGW_PACKAGE_PREFIX}-lmdb"
+             'git')
+depends=("${MINGW_PACKAGE_PREFIX}-cairo"
+         "${MINGW_PACKAGE_PREFIX}-gtk3"
+         "${MINGW_PACKAGE_PREFIX}-freetype"
+         "${MINGW_PACKAGE_PREFIX}-glib2"
+         "${MINGW_PACKAGE_PREFIX}-pango"
+         "${MINGW_PACKAGE_PREFIX}-atkmm"
+         "${MINGW_PACKAGE_PREFIX}-gdk-pixbuf2")
+source=("${_realname}::git+https://github.com/mTvare6/hello-world.rs#commit=${_commit}")
+sha256sums=('SKIP')
+
+pkgver() {
+  cd "${srcdir}/${_realname}"
+  echo "$(awk '/^VERSION =/ {print $3}' config.mk)".r"$(git rev-list --count HEAD)"."$(git rev-parse --short HEAD)"
+}
+
+build() {
+  cd "${srcdir}/${_realname}"
+  make
+}
+
+package() {
+  cd "${srcdir}/${_realname}"
+  make PREFIX="${MINGW_PREFIX}" DESTDIR="${pkgdir}" install
+  install -Dm644 LICENSE.rs "${pkgdir}${MINGW_PREFIX}/share/licenses/${_realname}/LICENSE"
+  install -Dm644 README.md "${pkgdir}${MINGW_PREFIX}/share/doc/${_realname}/README.md"
+}
