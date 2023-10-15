@@ -4,7 +4,7 @@ _realname=czkawka
 pkgbase=mingw-w64-${_realname}
 pkgname=("${MINGW_PACKAGE_PREFIX}-${_realname}-cli"
          "${MINGW_PACKAGE_PREFIX}-${_realname}-gui")
-pkgver=6.0.0
+pkgver=6.1.0
 pkgrel=1
 pkgdesc='Multi functional app to find duplicates, empty folders, similar images etc.'
 url='https://github.com/qarmin/czkawka'
@@ -15,13 +15,14 @@ makedepends=("${MINGW_PACKAGE_PREFIX}-rust"
              "${MINGW_PACKAGE_PREFIX}-gtk4"
              "${MINGW_PACKAGE_PREFIX}-libheif"
              "${MINGW_PACKAGE_PREFIX}-pkgconf")
-source=("${_realname}-${pkgver}.tar.gz::https://github.com/qarmin/czkawka/archive/refs/tags/${pkgver}.tar.gz")
-sha256sums=('32dc1d8a55bc3ce478246830a1f81679affa85735e69aa049fd83e30271e368f')
+source=("https://github.com/qarmin/czkawka/archive/refs/tags/${pkgver}/${_realname}-${pkgver}.tar.gz")
+sha256sums=('63e64c717a93b3d5210d6a4718833fdbf3ad7b28c9b74a243d9de3ab1ee6ad5a')
+noextract=("${_realname}-${pkgver}.tar.gz")
 
 prepare() {
-  cd "${srcdir}/${_realname}-${pkgver}"
-
-  cargo update -p windows-targets@0.48.0 --precise 0.48.1
+  cd "${srcdir}"
+  tar -xzf "${_realname}-${pkgver}.tar.gz" || true
+  cd "${_realname}-${pkgver}"
 
   local _target="${CARCH}-pc-windows-gnu"
   if [[ $MINGW_PACKAGE_PREFIX == *-clang-aarch64 ]]; then
