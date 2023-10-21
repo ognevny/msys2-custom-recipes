@@ -3,7 +3,7 @@
 _realname=fkysoxide
 pkgbase=mingw-w64-${_realname}
 pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}"
-pkgver=0.2.0
+pkgver=0.2.1
 pkgrel=1
 pkgdesc="A FKYS lang interpreter written in Rust (mingw-w64)"
 arch=('any')
@@ -12,7 +12,7 @@ url="https://github.com/ognevnydemon/fkys-rs"
 license=('spdx:WTFPL')
 makedepends=("${MINGW_PACKAGE_PREFIX}-rust")
 source=("${url}/archive/${pkgver}/${_realname}-${pkgver}.tar.gz")
-sha256sums=('b8a1badd326b16b581d2ae0e0aa8be13bba08e61f7bacb1efe9bc91659ca3c88')
+sha256sums=('59ba74e7bc6bb8837c1a867377ef8e0eaf98fe8a067c71443c791a6e1cff6570')
 
 prepare() {
   cd "${srcdir}/fkys-rs-${pkgver}"
