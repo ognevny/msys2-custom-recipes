@@ -6,15 +6,20 @@ pkgname=("${MINGW_PACKAGE_PREFIX}-${_realname}-cli"
          "${MINGW_PACKAGE_PREFIX}-${_realname}-gui")
 pkgver=6.1.0
 pkgrel=1
-pkgdesc='Multi functional app to find duplicates, empty folders, similar images etc.'
+pkgdesc="Multi functional app to find duplicates, empty folders, similar images etc (mingw-w64)"
 url='https://github.com/qarmin/czkawka'
 arch=('any')
 mingw_arch=('mingw32' 'mingw64' 'ucrt64' 'clang32' 'clang64' 'clangarm64')
-license=('spdx:MIT AND CC-BY-4.0')
-makedepends=("${MINGW_PACKAGE_PREFIX}-rust"
-             "${MINGW_PACKAGE_PREFIX}-gtk4"
-             "${MINGW_PACKAGE_PREFIX}-libheif"
-             "${MINGW_PACKAGE_PREFIX}-pkgconf")
+license=('spdx:MIT')
+depends=("${MINGW_PACKAGE_PREFIX}-bzip2"
+         "${MINGW_PACKAGE_PREFIX}-cairo"
+         "${MINGW_PACKAGE_PREFIX}-gdk-pixbuf2"
+         "${MINGW_PACKAGE_PREFIX}-gtk4"
+         "${MINGW_PACKAGE_PREFIX}-hicolor-icon-theme"
+         "${MINGW_PACKAGE_PREFIX}-libheif"
+         "${MINGW_PACKAGE_PREFIX}-pango"
+         "${MINGW_PACKAGE_PREFIX}-ffmpeg")
+makedepends=("${MINGW_PACKAGE_PREFIX}-rust" "${MINGW_PACKAGE_PREFIX}-pkgconf")
 source=("https://github.com/qarmin/czkawka/archive/refs/tags/${pkgver}/${_realname}-${pkgver}.tar.gz")
 sha256sums=('63e64c717a93b3d5210d6a4718833fdbf3ad7b28c9b74a243d9de3ab1ee6ad5a')
 noextract=("${_realname}-${pkgver}.tar.gz")
@@ -35,7 +40,7 @@ prepare() {
 build() {
   cd "${srcdir}/${_realname}-${pkgver}"
 
-  export PKG_CONFIG_PATH="${MINGW_PREFIX}/lib/pkgconf"
+  export PKG_CONFIG_PATH="${MINGW_PREFIX}/lib/pkgconfig"
   cargo build --bin czkawka_cli --release --features heif
   cargo build --bin czkawka_gui --release --features heif
 }
@@ -50,7 +55,9 @@ check() {
 package_czkawka-cli() {
   cd "${srcdir}/${_realname}-${pkgver}"
 
-  depends=("${MINGW_PACKAGE_PREFIX}-bzip2" "${MINGW_PACKAGE_PREFIX}-libheif")
+  depends=("${MINGW_PACKAGE_PREFIX}-bzip2" 
+           "${MINGW_PACKAGE_PREFIX}-libheif"
+           "${MINGW_PACKAGE_PREFIX}-ffmpeg")
   pkgdesc+=" (CLI)"
 
   install -Dm755 target/release/czkawka_cli.exe "${pkgdir}${MINGW_PREFIX}/bin/czkawka_cli.exe"
@@ -60,17 +67,10 @@ package_czkawka-cli() {
 package_czkawka-gui() {
   cd "${srcdir}/${_realname}-${pkgver}"
 
-  depends=("${MINGW_PACKAGE_PREFIX}-gtk4" "${MINGW_PACKAGE_PREFIX}-libheif")
   pkgdesc+=" (Desktop App)"
 
   install -Dm755 target/release/czkawka_gui.exe "${pkgdir}${MINGW_PREFIX}/bin/czkawka_gui.exe"
   install -Dm644 LICENSE "${pkgdir}${MINGW_PREFIX}/share/licenses/czkawka-gui/LICENSE"
-  install -Dm644 "data/icons/com.github.qarmin.czkawka.svg" \
-        "${pkgdir}${MINGW_PREFIX}/share/icons/hicolor/scalable/apps/com.github.qarmin.czkawka.svg"
-  install -Dm644 "data/icons/com.github.qarmin.czkawka.Devel.svg" \
-        "${pkgdir}${MINGW_PREFIX}/share/icons/hicolor/scalable/apps/com.github.qarmin.czkawka.Devel.svg"
-  install -Dm644 "data/icons/com.github.qarmin.czkawka-symbolic.svg" \
-        "${pkgdir}${MINGW_PREFIX}/share/icons/hicolor/symbolic/apps/com.github.qarmin.czkawka-symbolic.svg"
 }
 
 # template start; name=mingw-w64-splitpkg-wrappers; version=1.0;
