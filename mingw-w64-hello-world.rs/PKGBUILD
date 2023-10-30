@@ -7,7 +7,7 @@ pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}-git"
 pkgver=0.1.0.r356.2795222
 pkgrel=1
 arch=('any')
-mingw_arch=('mingw32' 'mingw64' 'ucrt64' 'clang32' 'clang64' 'clangarm64')
+mingw_arch=('mingw64' 'ucrt64' 'clang64' 'clangarm64')
 url="https://github.com/mTvare6/hello-world.rs"
 pkgdesc="Memory safe, blazing fast, configurable, minimal hello world written in rust under 1 line of code with few dependencies (mingw-w64)"
 license=('custom')
@@ -67,6 +67,7 @@ END
 build() {
   cd "${srcdir}/${_realname}"
   export PKG_CONFIG_PATH="${MINGW_PREFIX}/lib/pkgconfig"
+  export RUST_BACKTRACE=1
   export WINAPI_NO_BUNDLED_LIBRARIES=1
   make
 }
