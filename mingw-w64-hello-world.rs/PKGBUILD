@@ -1,0 +1,79 @@
+# Maintainer: Maksim Bondarenkov <maksapple2306@gmail.com>
+
+_realname=hello-world.rs
+_commit=2795222b102be8bba8928cc0c131580c8c9e67ee
+pkgbase=mingw-w64-${_realname}
+pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}-git"
+pkgver=0.1.0.r356.2795222
+pkgrel=1
+arch=('any')
+mingw_arch=('mingw32' 'mingw64' 'ucrt64' 'clang32' 'clang64' 'clangarm64')
+url="https://github.com/mTvare6/hello-world.rs"
+pkgdesc="Memory safe, blazing fast, configurable, minimal hello world written in rust under 1 line of code with few dependencies (mingw-w64)"
+license=('custom')
+makedepends=("${MINGW_PACKAGE_PREFIX}-rust"
+             "${MINGW_PACKAGE_PREFIX}-cmake"
+             "${MINGW_PACKAGE_PREFIX}-pkgconf"
+             "${MINGW_PACKAGE_PREFIX}-lmdb"
+             'git')
+depends=("${MINGW_PACKAGE_PREFIX}-cairo"
+         "${MINGW_PACKAGE_PREFIX}-gtk3"
+         "${MINGW_PACKAGE_PREFIX}-freetype"
+         "${MINGW_PACKAGE_PREFIX}-glib2"
+         "${MINGW_PACKAGE_PREFIX}-pango"
+         "${MINGW_PACKAGE_PREFIX}-atkmm"
+         "${MINGW_PACKAGE_PREFIX}-gdk-pixbuf2")
+source=("${_realname}::git+https://github.com/mTvare6/hello-world.rs#commit=${_commit}"
+        "fix-finding-lmdb.patch"
+        "amethyst-fix-missing-txt.patch"
+        "ntapi-fix-UB.patch"
+        "mp4parse-fix-macro.patch"
+        "remove-unused-features.patch")
+sha256sums=('SKIP'
+            'bddbd389fc6751288c334f8086de7d4d354fdf222a08c7ad4e3dcad988a739ca'
+            '65cd146ce0dbf33604630e00d924645a69cf994bc222548d53f65751399df7a9'
+            '984282aa4400c9530161e84fc1956f0f5f9f0e1a494030467a1c71c6001ae700'
+            '7c2bcb47aacfa9a88673c1d8c25ec1e8ae38e57ab1b1e550277d9a90f5f9945c'
+            '41d2511c7a3f22cc87ff8afbb679899d2b4866a704ac87b85f9cb00f4e5a970c')
+
+pkgver() {
+  cd "${srcdir}/${_realname}"
+  echo "$(awk '/^VERSION =/ {print $3}' config.mk)".r"$(git rev-list --count HEAD)"."$(git rev-parse --short HEAD)"
+}
+
+prepare() {
+  cd "${srcdir}/${_realname}"
+  cargo vendor \
+    --locked \
+    --versioned-dirs
+
+  mkdir -p .cargo
+  cat >> .cargo/config.toml <<END
+
+[source.crates-io]
+replace-with = "vendored-sources"
+
+[source.vendored-sources]
+directory = "vendor"
+END
+
+  patch -Np1 -i "${srcdir}/fix-finding-lmdb.patch"
+  patch -Np1 -i "${srcdir}/amethyst-fix-missing-txt.patch"
+  patch -Np1 -i "${srcdir}/ntapi-fix-UB.patch"
+  patch -Np1 -i "${srcdir}/mp4parse-fix-macro.patch"
+  patch -Np1 -i "${srcdir}/remove-unused-features.patch"
+}
+
+build() {
+  cd "${srcdir}/${_realname}"
+  export PKG_CONFIG_PATH="${MINGW_PREFIX}/lib/pkgconfig"
+  export WINAPI_NO_BUNDLED_LIBRARIES=1
+  make
+}
+
+package() {
+  cd "${srcdir}/${_realname}"
+  make PREFIX="${MINGW_PREFIX}" DESTDIR="${pkgdir}" install
+  install -Dm644 LICENSE.rs "${pkgdir}${MINGW_PREFIX}/share/licenses/${_realname}/LICENSE"
+  install -Dm644 README.md "${pkgdir}${MINGW_PREFIX}/share/doc/${_realname}/README.md"
+}
