@@ -1,10 +1,10 @@
 # Maintainer: Maksim Bondarenkov <maksapple2306@gmail.com>
 
 _realname=hello-world.rs
-_commit=2795222b102be8bba8928cc0c131580c8c9e67ee
+_commit=6ba6791c8652ae213fc3f0ed079944fbe6bfb049
 pkgbase=mingw-w64-${_realname}
 pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}-git"
-pkgver=0.1.0.r356.2795222
+pkgver=0.1.0.r359.6ba6791
 pkgrel=1
 arch=('any')
 mingw_arch=('mingw64' 'ucrt64' 'clang64' 'clangarm64')
@@ -23,20 +23,8 @@ depends=("${MINGW_PACKAGE_PREFIX}-cairo"
          "${MINGW_PACKAGE_PREFIX}-pango"
          "${MINGW_PACKAGE_PREFIX}-atkmm"
          "${MINGW_PACKAGE_PREFIX}-gdk-pixbuf2")
-source=("${_realname}::git+https://github.com/mTvare6/hello-world.rs#commit=${_commit}"
-        "fix-finding-lmdb.patch"
-        "amethyst-fix-missing-txt.patch"
-        "ntapi-fix-UB.patch"
-        "mp4parse-fix-macro.patch"
-        "remove-unused-features.patch"
-        "disable-build-script.patch")
-sha256sums=('SKIP'
-            'bddbd389fc6751288c334f8086de7d4d354fdf222a08c7ad4e3dcad988a739ca'
-            '65cd146ce0dbf33604630e00d924645a69cf994bc222548d53f65751399df7a9'
-            '984282aa4400c9530161e84fc1956f0f5f9f0e1a494030467a1c71c6001ae700'
-            '7c2bcb47aacfa9a88673c1d8c25ec1e8ae38e57ab1b1e550277d9a90f5f9945c'
-            '41d2511c7a3f22cc87ff8afbb679899d2b4866a704ac87b85f9cb00f4e5a970c'
-            'aeaaaa8156ec019dbaf9b0bd45745e51e06b5515ed4b40d00fe0b00eaf234f6a')
+source=("${_realname}::git+https://github.com/ognevnydemon/hello-world.rs-mingw#commit=${_commit}")
+sha256sums=('SKIP')
 
 pkgver() {
   cd "${srcdir}/${_realname}"
@@ -49,29 +37,12 @@ prepare() {
     --locked \
     --versioned-dirs
 
-  mkdir -p .cargo
-  cat >> .cargo/config.toml <<END
-
-[source.crates-io]
-replace-with = "vendored-sources"
-
-[source.vendored-sources]
-directory = "vendor"
-END
-
-  patch -Np1 -i "${srcdir}/fix-finding-lmdb.patch"
-  patch -Np1 -i "${srcdir}/amethyst-fix-missing-txt.patch"
-  patch -Np1 -i "${srcdir}/ntapi-fix-UB.patch"
-  patch -Np1 -i "${srcdir}/mp4parse-fix-macro.patch"
-  patch -Np1 -i "${srcdir}/remove-unused-features.patch"
-  # no idea how to fix, maybe it's MSVC thing that just doesn't work there
-  patch -Np1 -i "${srcdir}/disable-build-script.patch"
+  patch -Np0 -i fix-deps.patch
 }
 
 build() {
   cd "${srcdir}/${_realname}"
   export PKG_CONFIG_PATH="${MINGW_PREFIX}/lib/pkgconfig"
-  export RUST_BACKTRACE=1
   export WINAPI_NO_BUNDLED_LIBRARIES=1
   make
 }
