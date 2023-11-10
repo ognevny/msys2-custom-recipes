@@ -1,10 +1,10 @@
 # Maintainer: Maksim Bondarenkov <maksapple2306@gmail.com>
 
 _realname=rustpython
-_commit=af884cb284b8ca0367b5ba331acbc0d9fdf00518
+_commit=6d23daa480e6fec4a84c1585e715e16364816de7
 pkgbase=mingw-w64-${_realname}
 pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}"
-pkgver=r13356.af884cb28
+pkgver=r13371.6d23daa48
 pkgrel=1
 pkgdesc="A Python Interpreter written in Rust (mingw-w64)"
 arch=('any')
@@ -17,8 +17,10 @@ makedepends=("${MINGW_PACKAGE_PREFIX}-rust"
              "${MINGW_PACKAGE_PREFIX}-python"
              'git')
 depends=("${MINGW_PACKAGE_PREFIX}-openssl" "${MINGW_PACKAGE_PREFIX}-bzip2")
-source=("${_realname}::git+${url}#commit=${_commit}")
-sha256sums=('SKIP')
+source=("${_realname}::git+${url}#commit=${_commit}"
+        "fix-pylib-path.patch")
+sha256sums=('SKIP'
+            '0b90e6bdd598cbdac4a9221cc841c02e4557110d9d6a6cba7130a036b7e5651f')
 
 pkgver() {
   cd "${srcdir}/${_realname}"
@@ -34,20 +36,21 @@ prepare() {
   fi
 
   cargo fetch --locked --target "${_target}"
+  patch -Np1 -i "${srcdir}/fix-pylib-path.patch"
 }
 
 build() {
   cd "${srcdir}/${_realname}"
 
   WINAPI_NO_BUNDLED_LIBRARIES=1 \
-    cargo build --release --locked --features "bz2 jit ssl"
+    cargo build --release --locked --features "bz2 jit ssl freeze-stdlib"
 }
 
 check() {
   cd "${srcdir}/${_realname}"
 
   WINAPI_NO_BUNDLED_LIBRARIES=1 \
-    cargo test --release --locked --features "bz2 jit ssl"
+    cargo test --release --locked --features "bz2 jit ssl freeze-stdlib"
 }
 
 package() {
@@ -58,7 +61,7 @@ package() {
       --frozen \
       --offline \
       --no-track \
-      --features "bz2 jit ssl" \
+      --features "bz2 jit ssl freeze-stdlib" \
       --path . \
       --root "${pkgdir}${MINGW_PREFIX}"
 
