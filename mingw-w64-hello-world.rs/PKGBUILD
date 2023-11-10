@@ -1,10 +1,10 @@
 # Maintainer: Maksim Bondarenkov <maksapple2306@gmail.com>
 
 _realname=hello-world.rs
-_commit=6ba6791c8652ae213fc3f0ed079944fbe6bfb049
+_commit=90d66ff49af94e2dce376f23440832350c2d51d2
 pkgbase=mingw-w64-${_realname}
 pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}-git"
-pkgver=0.1.0.r359.6ba6791
+pkgver=0.1.0.r360.90d66ff
 pkgrel=1
 arch=('any')
 mingw_arch=('mingw64' 'ucrt64' 'clang64' 'clangarm64')
