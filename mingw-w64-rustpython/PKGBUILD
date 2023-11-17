@@ -1,10 +1,10 @@
 # Maintainer: Maksim Bondarenkov <maksapple2306@gmail.com>
 
 _realname=rustpython
-_commit=6d23daa480e6fec4a84c1585e715e16364816de7
+_commit=068249196f6877e2c778bb75056dae8e1471aad1
 pkgbase=mingw-w64-${_realname}
 pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}"
-pkgver=r13371.6d23daa48
+pkgver=r13373.068249196
 pkgrel=1
 pkgdesc="A Python Interpreter written in Rust (mingw-w64)"
 arch=('any')
@@ -16,7 +16,9 @@ makedepends=("${MINGW_PACKAGE_PREFIX}-rust"
              "${MINGW_PACKAGE_PREFIX}-pkgconf"
              "${MINGW_PACKAGE_PREFIX}-python"
              'git')
-depends=("${MINGW_PACKAGE_PREFIX}-openssl" "${MINGW_PACKAGE_PREFIX}-bzip2")
+depends=("${MINGW_PACKAGE_PREFIX}-openssl" 
+         "${MINGW_PACKAGE_PREFIX}-bzip2"
+         "${MINGW_PACKAGE_PREFIX}-zlib")
 source=("${_realname}::git+${url}#commit=${_commit}"
         "fix-pylib-path.patch")
 sha256sums=('SKIP'
