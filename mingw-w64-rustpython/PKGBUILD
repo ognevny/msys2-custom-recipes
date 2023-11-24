@@ -1,10 +1,10 @@
 # Maintainer: Maksim Bondarenkov <maksapple2306@gmail.com>
 
 _realname=rustpython
-_commit=068249196f6877e2c778bb75056dae8e1471aad1
+_commit=8fc2c39d62d230f53ed701395612c3168a4464be
 pkgbase=mingw-w64-${_realname}
 pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}"
-pkgver=r13373.068249196
+pkgver=r13385.8fc2c39d6
 pkgrel=1
 pkgdesc="A Python Interpreter written in Rust (mingw-w64)"
 arch=('any')
