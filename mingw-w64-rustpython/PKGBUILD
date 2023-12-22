@@ -16,7 +16,7 @@ makedepends=("${MINGW_PACKAGE_PREFIX}-rust"
              "${MINGW_PACKAGE_PREFIX}-pkgconf"
              "${MINGW_PACKAGE_PREFIX}-python"
              'git')
-depends=("${MINGW_PACKAGE_PREFIX}-openssl" 
+depends=("${MINGW_PACKAGE_PREFIX}-openssl"
          "${MINGW_PACKAGE_PREFIX}-bzip2"
          "${MINGW_PACKAGE_PREFIX}-zlib")
 source=("${_realname}::git+${url}#commit=${_commit}"
