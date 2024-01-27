@@ -1,0 +1,41 @@
+# Maintainer: Maksim Bondarenkov <maksapple2306@gmail.com>
+
+_realname=calculator-c
+pkgbase=mingw-w64-${_realname}
+pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}"
+pkgver=r52.7e063d8
+pkgrel=1
+pkgdesc="Extremely simple arithmetic calculator written in C"
+arch=('any')
+mingw_arch=('mingw64' 'ucrt64' 'clang64' 'clangarm64')
+url="https://github.com/KieranCrossland/calculator-c"
+license=('spdx:GPL-3.0')
+makedepends=("${MINGW_PACKAGE_PREFIX}-cc")
+source=("${_realname}::git+${url}.git#commit=7e063d8ff52f4cfca32e9989547145e8d08409dc"
+        "mingw-build.patch")
+sha256sums=('SKIP'
+            '1af5ad179ef2b514cad5c0c5439ebf5afc128e74cb66ae1ed46201b23741c6e5')
+
+pkgver() {
+  cd "${srcdir}/${_realname}"
+  printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
+}
+
+prepare() {
+  cd "${srcdir}/${_realname}"
+
+  patch -Np1 -i "${srcdir}/mingw-build.patch"
+}
+
+build() {
+  cd "${srcdir}/${_realname}"
+
+  make
+}
+
+package() {
+  cd "${srcdir}/${_realname}"
+
+  make install DESTDIR="${pkgdir}" PREFIX="${MINGW_PREFIX}"
+  install -Dm644 LICENSE "${pkgdir}${MINGW_PREFIX}/share/licenses/${_realname}/LICENSE"
+}

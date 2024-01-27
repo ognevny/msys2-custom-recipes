@@ -1,0 +1,130 @@
+diff --git a/Makefile b/Makefile
+index f58a6e4..b77db64 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1,13 +1,16 @@
++PREFIX ?= /usr/local
++BINDIR ?= $(PREFIX)/bin
++DESTDIR ?=
++
+ default:
+-	cc src/calculator.c -o bin/calculator
++	cc src/calculator.c $(LDFLAGS) -o bin/calculator
+ 
+ clean:
+ 	rm -rf bin
+-	
+-install:
+-	cp bin/calculator /usr/local/bin/
+-	
+-uninstall:
+-	rm /usr/local/bin/calculator
+ 
++install:
++	install -d $(DESTDIR)$(BINDIR)
++	install -m755 bin/calculator $(DESTDIR)$(BINDIR)
+ 
++uninstall:
++	rm $(BINDIR)/calculator
+diff --git a/src/calculator.c b/src/calculator.c
+index 0511884..6cb338b 100644
+--- a/src/calculator.c
++++ b/src/calculator.c
+@@ -3,11 +3,15 @@
+ #include <string.h>
+ #include <signal.h>
+ 
+-void catch_int(int sig_num) 
++int help_arg();
++
++int calculator();
++
++void catch_int(int sig_num)
+ {
+     signal(SIGINT, catch_int);
+     printf("\n\nCaught CTRL-C SIGINT\n");
+-    fflush(stdout);	
++    fflush(stdout);
+     exit(1);
+ 
+ }
+@@ -23,21 +27,6 @@ int main(int argc, char *argv[])
+ 		printf("%s %.1f",NAME, VERSION);
+ 			exit(EXIT_SUCCESS);
+ 		}
+-		if (strcmp(argv[1],"-r") == 0) {
+-			printf("Attempting to open default browser (xdg-open)\n");
+-			system("xdg-open https:/github.com/kierancrossland/calculator-c");
+-			exit(EXIT_SUCCESS);
+-		} 
+-		if (strcmp(argv[1],"-w") == 0) {
+-			printf("Attempting to open default browser (xdg-open)\n");
+-			system("xdg-open https://www.kieranc.xyz");
+-			exit(EXIT_SUCCESS);
+-		}
+-		if (strcmp(argv[1],"-m") == 0) {
+-			printf("Attempting to open default Email client (xdg-email)\n");
+-			system("xdg-email mailto:kierancrossland1st@gmail.com");
+-			exit(EXIT_SUCCESS);
+-		}
+ 		if (strcmp(argv[1],"-h") == 0) {
+ 			help_arg();
+ 			exit(EXIT_SUCCESS);
+@@ -50,45 +39,42 @@ int main(int argc, char *argv[])
+ }
+ 	calculator();
+ }
+-int help_arg() 
++int help_arg()
+ {
+ 	printf("Avaliable arguments:\n");
+ 	printf("  -v\tPrints the version information\n");
+-	printf("  -r\tOpens the program's Git repository\n");
+-	printf("  -w\tOpens the programmer's website\n");
+-	printf("  -m\tEmails the programmer (kierancrossland1st@gmail.com)\n");
+ }
+ 
+-int calculator()  
++int calculator()
+ {
+-	signal(SIGINT, catch_int); 
++	signal(SIGINT, catch_int);
++
++	char operator[1];
++	int number1;
++	int number2;
+ 
+-	char operator[1];	
+-	int number1; 		
+-	int number2;	
+-	
+ 	printf("Enter expression: ");
+ 	scanf("%d",&number1);
+ 	scanf("%s",operator);
+ 	scanf("%d",&number2);
+ 	printf("%d %s %d",number1,operator,number2);
+-	
+-	if (strcmp(operator, "+") == 0) { 		
++
++	if (strcmp(operator, "+") == 0) {
+ 		int sum = number1 + number2;
+ 		printf(" = %d\n", sum);
+ 		calculator();
+ 	}
+-	else if (strcmp(operator, "-") == 0) {	
++	else if (strcmp(operator, "-") == 0) {
+ 		int difference = number1 - number2;
+ 		printf(" = %d\n",difference);
+ 	 	calculator();
+ 	}
+-	else if (strcmp(operator, "*") == 0) {	
++	else if (strcmp(operator, "*") == 0) {
+ 		int product = number1 * number2;
+ 		printf(" = %d\n",product);
+ 	 	calculator();
+ 	}
+-	else if (strcmp(operator, "/") == 0) {	
++	else if (strcmp(operator, "/") == 0) {
+ 		int quotient = number1 / number2;
+ 		printf(" = %d\n",quotient);
+ 	 	calculator();
