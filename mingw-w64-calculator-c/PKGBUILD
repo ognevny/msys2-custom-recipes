@@ -10,7 +10,7 @@ arch=('any')
 mingw_arch=('mingw64' 'ucrt64' 'clang64' 'clangarm64')
 url="https://github.com/KieranCrossland/calculator-c"
 license=('spdx:GPL-3.0')
-makedepends=("${MINGW_PACKAGE_PREFIX}-cc")
+makedepends=("${MINGW_PACKAGE_PREFIX}-cc" 'git')
 source=("${_realname}::git+${url}.git#commit=7e063d8ff52f4cfca32e9989547145e8d08409dc"
         "mingw-build.patch")
 sha256sums=('SKIP'
