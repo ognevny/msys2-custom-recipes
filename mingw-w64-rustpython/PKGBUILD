@@ -1,10 +1,10 @@
 # Maintainer: Maksim Bondarenkov <maksapple2306@gmail.com>
 
 _realname=rustpython
-_commit=28f0fa48a4bb069c758df9789e478210eda38977
+_commit=3eda1cf3b4a29eb35c30f2a3ed272771c642c065
 pkgbase=mingw-w64-${_realname}
 pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}"
-pkgver=r13452.28f0fa48a
+pkgver=r13455.3eda1cf3b
 pkgrel=1
 pkgdesc="A Python Interpreter written in Rust (mingw-w64)"
 arch=('any')
@@ -12,16 +12,18 @@ mingw_arch=('mingw64' 'ucrt64' 'clang64' 'clangarm64')
 url="https://github.com/RustPython/RustPython"
 license=('spdx:MIT')
 makedepends=("${MINGW_PACKAGE_PREFIX}-rust"
-             "${MINGW_PACKAGE_PREFIX}-openssl"
              "${MINGW_PACKAGE_PREFIX}-pkgconf"
              "${MINGW_PACKAGE_PREFIX}-python"
              'git')
 depends=("${MINGW_PACKAGE_PREFIX}-openssl"
-         "${MINGW_PACKAGE_PREFIX}-zlib")
+         "${MINGW_PACKAGE_PREFIX}-zlib"
+         "${MINGW_PACKAGE_PREFIX}-libffi")
 source=("${_realname}::git+${url}#commit=${_commit}"
-        "fix-pylib-path.patch")
+        "fix-pylib-path.patch"
+        "use-system-libffi.patch")
 sha256sums=('SKIP'
-            '0b90e6bdd598cbdac4a9221cc841c02e4557110d9d6a6cba7130a036b7e5651f')
+            '0b90e6bdd598cbdac4a9221cc841c02e4557110d9d6a6cba7130a036b7e5651f'
+            '54d3c2790d366b02591efdeda8b0c996c794d8f7d50fc04c2c2581571c24c1d4')
 
 pkgver() {
   cd "${srcdir}/${_realname}"
@@ -37,27 +39,38 @@ prepare() {
   fi
 
   cargo fetch --locked --target "${_target}"
+
   patch -Np1 -i "${srcdir}/fix-pylib-path.patch"
+  patch -Np1 -i "${srcdir}/use-system-libffi.patch"
 }
 
 build() {
   cd "${srcdir}/${_realname}"
 
+  LIBZ_SYS_STATIC=0 \
+  OPENSSL_NO_VENDOR=1 \
   WINAPI_NO_BUNDLED_LIBRARIES=1 \
+  LIBSQLITE3_SYS_USE_PKG_CONFIG=1 \
     cargo build --release --locked --features "bz2 jit ssl freeze-stdlib"
 }
 
 check() {
   cd "${srcdir}/${_realname}"
 
+  LIBZ_SYS_STATIC=0 \
+  OPENSSL_NO_VENDOR=1 \
   WINAPI_NO_BUNDLED_LIBRARIES=1 \
+  LIBSQLITE3_SYS_USE_PKG_CONFIG=1 \
     cargo test --release --locked --features "bz2 jit ssl freeze-stdlib"
 }
 
 package() {
   cd "${srcdir}/${_realname}"
 
+  LIBZ_SYS_STATIC=0 \
+  OPENSSL_NO_VENDOR=1 \
   WINAPI_NO_BUNDLED_LIBRARIES=1 \
+  LIBSQLITE3_SYS_USE_PKG_CONFIG=1 \
     cargo install \
       --frozen \
       --offline \
