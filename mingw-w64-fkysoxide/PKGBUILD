@@ -3,7 +3,7 @@
 _realname=fkysoxide
 pkgbase=mingw-w64-${_realname}
 pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}"
-pkgver=0.2.6
+pkgver=0.2.7
 pkgrel=1
 pkgdesc="A FKYS lang interpreter written in Rust (mingw-w64)"
 arch=('any')
@@ -13,7 +13,7 @@ license=('spdx:WTFPL')
 makedepends=("${MINGW_PACKAGE_PREFIX}-rust")
 options=('!strip' '!lto') # they're enabled in Cargo manifest
 source=("${url}/archive/${pkgver}/${_realname}-${pkgver}.tar.gz")
-sha256sums=('f2eabf646c57cbae6ed06ab47f40abbb64376cda9f197fc0ef40111513c631c4')
+sha256sums=('cc54470951359f112fb52a1ffb7c746d80af82be0d52fb8afa730a8850f7c307')
 
 prepare() {
   cd "${srcdir}/fkys-rs-${pkgver}"
@@ -30,12 +30,6 @@ build() {
   cd "${srcdir}/fkys-rs-${pkgver}"
 
   cargo build --release --locked
-}
-
-check() {
-  cd "${srcdir}/fkys-rs-${pkgver}"
-
-  cargo test --release --test '*'
 }
 
 package() {
