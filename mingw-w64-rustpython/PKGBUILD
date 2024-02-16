@@ -1,10 +1,10 @@
 # Maintainer: Maksim Bondarenkov <maksapple2306@gmail.com>
 
 _realname=rustpython
-_commit=3eda1cf3b4a29eb35c30f2a3ed272771c642c065
+_commit=1c93c1630b536d398ab86f91b0f3424aad76ddc8
 pkgbase=mingw-w64-${_realname}
 pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}"
-pkgver=r13455.3eda1cf3b
+pkgver=r13468.1c93c1630
 pkgrel=1
 pkgdesc="A Python Interpreter written in Rust (mingw-w64)"
 arch=('any')
@@ -22,7 +22,7 @@ source=("${_realname}::git+${url}#commit=${_commit}"
         "fix-pylib-path.patch"
         "use-system-libffi.patch")
 sha256sums=('SKIP'
-            '0b90e6bdd598cbdac4a9221cc841c02e4557110d9d6a6cba7130a036b7e5651f'
+            'd114917f3eaeccaa63840f27aa086a7265c3a535f68d8f2e2409c18c796fe049'
             '54d3c2790d366b02591efdeda8b0c996c794d8f7d50fc04c2c2581571c24c1d4')
 
 pkgver() {
@@ -33,15 +33,15 @@ pkgver() {
 prepare() {
   cd "${srcdir}/${_realname}"
 
+  patch -Np1 -i "${srcdir}/fix-pylib-path.patch"
+  patch -Np1 -i "${srcdir}/use-system-libffi.patch"
+
   local _target="${CARCH}-pc-windows-gnu"
   if [[ $MINGW_PACKAGE_PREFIX == *-clang-aarch64 ]]; then
     _target="${CARCH}-pc-windows-gnullvm"
   fi
 
   cargo fetch --locked --target "${_target}"
-
-  patch -Np1 -i "${srcdir}/fix-pylib-path.patch"
-  patch -Np1 -i "${srcdir}/use-system-libffi.patch"
 }
 
 build() {
