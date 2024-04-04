@@ -1,10 +1,10 @@
 # Maintainer: Maksim Bondarenkov <maksapple2306@gmail.com>
 
 _realname=rustpython
-_commit=426e582ba039492b789b114d26b29f3dfa86c56e
+_commit=e349b0f18bb548e7ffe48b7d05495a34dac560da
 pkgbase=mingw-w64-${_realname}
 pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}"
-pkgver=r13513.426e582ba
+pkgver=r13637.e349b0f18
 pkgrel=1
 pkgdesc="A Python Interpreter written in Rust (mingw-w64)"
 arch=('any')
@@ -18,67 +18,71 @@ makedepends=("${MINGW_PACKAGE_PREFIX}-rust"
              'git')
 depends=("${MINGW_PACKAGE_PREFIX}-openssl"
          "${MINGW_PACKAGE_PREFIX}-zlib"
-         "${MINGW_PACKAGE_PREFIX}-libffi")
+         "${MINGW_PACKAGE_PREFIX}-libffi"
+         "${MINGW_PACKAGE_PREFIX}-bzip2")
 source=("${_realname}::git+${url}#commit=${_commit}"
         "fix-pylib-path.patch"
-        "use-system-libffi.patch")
+        "use-system-libs.patch")
 sha256sums=('SKIP'
             'd114917f3eaeccaa63840f27aa086a7265c3a535f68d8f2e2409c18c796fe049'
-            '54d3c2790d366b02591efdeda8b0c996c794d8f7d50fc04c2c2581571c24c1d4')
+            '7f792966bf803cd602c15434d58a78bf5bea509cd66a572a01dfcbabc1cabe75')
 
 pkgver() {
   cd "${srcdir}/${_realname}"
   printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
 }
 
+_env() {
+  export LIBZ_SYS_STATIC=0
+  export OPENSSL_NO_VENDOR=1
+  export PKG_CONFIG_ALL_DYNAMIC=1
+  export WINAPI_NO_BUNDLED_LIBRARIES=1
+  export LIBSQLITE3_SYS_USE_PKG_CONFIG=1
+}
+
 prepare() {
   cd "${srcdir}/${_realname}"
 
+  cargo vendor --locked --versioned-dirs
+  cat >> .cargo/config.toml <<END
+
+[source.crates-io]
+replace-with = "vendored-sources"
+
+[source.vendored-sources]
+directory = "vendor"
+END
+
   patch -Np1 -i "${srcdir}/fix-pylib-path.patch"
-  patch -Np1 -i "${srcdir}/use-system-libffi.patch"
+  patch -Np1 -i "${srcdir}/use-system-libs.patch"
 
-  local _target="${CARCH}-pc-windows-gnu"
-  if [[ $MINGW_PACKAGE_PREFIX == *-clang-aarch64 ]]; then
-    _target="${CARCH}-pc-windows-gnullvm"
-  fi
-
-  cargo fetch --locked --target "${_target}"
 }
 
 build() {
   cd "${srcdir}/${_realname}"
 
-  LIBZ_SYS_STATIC=0 \
-  OPENSSL_NO_VENDOR=1 \
-  WINAPI_NO_BUNDLED_LIBRARIES=1 \
-  LIBSQLITE3_SYS_USE_PKG_CONFIG=1 \
-    cargo build --release --locked --features "bz2 jit ssl freeze-stdlib"
+  _env
+  cargo build --release --locked --features "bz2 jit ssl freeze-stdlib"
 }
 
 check() {
   cd "${srcdir}/${_realname}"
 
-  LIBZ_SYS_STATIC=0 \
-  OPENSSL_NO_VENDOR=1 \
-  WINAPI_NO_BUNDLED_LIBRARIES=1 \
-  LIBSQLITE3_SYS_USE_PKG_CONFIG=1 \
-    cargo test --release --locked --features "bz2 jit ssl freeze-stdlib"
+  _env
+  cargo test --release --locked --features "bz2 jit ssl freeze-stdlib"
 }
 
 package() {
   cd "${srcdir}/${_realname}"
 
-  LIBZ_SYS_STATIC=0 \
-  OPENSSL_NO_VENDOR=1 \
-  WINAPI_NO_BUNDLED_LIBRARIES=1 \
-  LIBSQLITE3_SYS_USE_PKG_CONFIG=1 \
-    cargo install \
-      --frozen \
-      --offline \
-      --no-track \
-      --features "bz2 jit ssl freeze-stdlib" \
-      --path . \
-      --root "${pkgdir}${MINGW_PREFIX}"
+  _env
+  cargo install \
+    --frozen \
+    --offline \
+    --no-track \
+    --features "bz2 jit ssl freeze-stdlib" \
+    --path . \
+    --root "${pkgdir}${MINGW_PREFIX}"
 
   install -Dm644 LICENSE "${pkgdir}${MINGW_PREFIX}/share/licenses/${_realname}/LICENSE"
 }
