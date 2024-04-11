@@ -1,10 +1,10 @@
 # Maintainer: Maksim Bondarenkov <maksapple2306@gmail.com>
 
 _realname=rustpython
-_commit=e349b0f18bb548e7ffe48b7d05495a34dac560da
+_commit=940b879950171a70a20de55d5745920af79cab27
 pkgbase=mingw-w64-${_realname}
 pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}"
-pkgver=r13637.e349b0f18
+pkgver=r13661.940b87995
 pkgrel=1
 pkgdesc="A Python Interpreter written in Rust (mingw-w64)"
 arch=('any')
@@ -42,6 +42,7 @@ _env() {
 
 prepare() {
   cd "${srcdir}/${_realname}"
+  patch -Np1 -i "${srcdir}/fix-pylib-path.patch"
 
   cargo vendor --locked --versioned-dirs
   cat >> .cargo/config.toml <<END
@@ -53,9 +54,7 @@ replace-with = "vendored-sources"
 directory = "vendor"
 END
 
-  patch -Np1 -i "${srcdir}/fix-pylib-path.patch"
   patch -Np1 -i "${srcdir}/use-system-libs.patch"
-
 }
 
 build() {
