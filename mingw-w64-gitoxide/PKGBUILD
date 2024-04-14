@@ -3,7 +3,7 @@
 _realname=gitoxide
 pkgbase=mingw-w64-${_realname}
 pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}"
-pkgver=0.34.0
+pkgver=0.35.0
 pkgrel=1
 pkgdesc="An idiomatic, lean, fast & safe pure Rust implementation of Git (mingw-w64)"
 arch=('any')
@@ -18,20 +18,12 @@ makedepends=("${MINGW_PACKAGE_PREFIX}-rust"
              "${MINGW_PACKAGE_PREFIX}-cmake"
              "${MINGW_PACKAGE_PREFIX}-pkgconf")
 source=("${url}/archive/v${pkgver}/${_realname}-${pkgver}.tar.gz")
-sha256sums=('5f0686213fa3ad3d6f3adedf3df463dfdb9bb60f9cad03a174ec6b5adba1567f')
-noextract=("${_realname}-${pkgver}.tar.gz")
+sha256sums=('4f074b30830ff37da8ae9de11b0441addea9f1552f0fcac1fa6fb56435d5bbea')
 
 prepare() {
-  cd "${srcdir}"
-  tar -xzf "${_realname}-${pkgver}.tar.gz" || true
   cd "${_realname}-${pkgver}"
 
-  local _target="${CARCH}-pc-windows-gnu"
-  if [[ $MINGW_PACKAGE_PREFIX == *-clang-aarch64 ]]; then
-    _target="${CARCH}-pc-windows-gnullvm"
-  fi
-
-  cargo fetch --locked --target "${_target}"
+  cargo fetch --locked --target "$(rustc -vV | sed -n 's/host: //p')"
 }
 
 build() {
