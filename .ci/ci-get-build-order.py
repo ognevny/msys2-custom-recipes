@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 
+from dataclasses import dataclass
+from multiprocessing.pool import ThreadPool
+
 import os
 import re
 import subprocess
 import sys
-from dataclasses import dataclass
-from multiprocessing.pool import ThreadPool
 
 
 @dataclass

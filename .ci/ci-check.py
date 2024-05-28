@@ -270,7 +270,7 @@ def main() -> None:
 
     if exit_code != 0:
         sys.exit(exit_code)
-    
+
     print("Strip option check is done.")
 
     for pkgloc in ARTIFACTS_LOCATION.glob("*.pkg.tar.*"):
