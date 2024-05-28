@@ -3,7 +3,7 @@
 _realname=gitoxide
 pkgbase=mingw-w64-${_realname}
 pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}"
-pkgver=0.35.0
+pkgver=0.36.0
 pkgrel=1
 pkgdesc="An idiomatic, lean, fast & safe pure Rust implementation of Git (mingw-w64)"
 arch=('any')
@@ -16,34 +16,40 @@ msys2_references=(
 depends=("${MINGW_PACKAGE_PREFIX}-sqlite3")
 makedepends=("${MINGW_PACKAGE_PREFIX}-rust"
              "${MINGW_PACKAGE_PREFIX}-cmake"
-             "${MINGW_PACKAGE_PREFIX}-pkgconf")
-source=("${url}/archive/v${pkgver}/${_realname}-${pkgver}.tar.gz")
-sha256sums=('4f074b30830ff37da8ae9de11b0441addea9f1552f0fcac1fa6fb56435d5bbea')
+             "${MINGW_PACKAGE_PREFIX}-pkgconf"
+             'git')
+source=("git+${url}.git#tag=v${pkgver}")
+sha256sums=('36e35e1e1ac89322e95b5d737f7645aff44351a46fa38de1520a6eb14286b71a')
+
+_env() {
+  export WINAPI_NO_BUNDLED_LIBRARIES=1
+  export LIBSQLITE3_SYS_USE_PKG_CONFIG=1
+}
 
 prepare() {
-  cd "${_realname}-${pkgver}"
+  cd "${_realname}"
 
   cargo fetch --locked --target "$(rustc -vV | sed -n 's/host: //p')"
 }
 
 build() {
-  cd "${srcdir}/${_realname}-${pkgver}"
+  cd "${_realname}"
 
-  LIBSQLITE3_SYS_USE_PKG_CONFIG=1 \
-    cargo build --release --locked --no-default-features --features max-pure
+  _env
+  cargo build --release --locked --no-default-features --features max-pure
 }
 
 check() {
-  cd "${srcdir}/${_realname}-${pkgver}"
+  cd "${_realname}"
 
-  LIBSQLITE3_SYS_USE_PKG_CONFIG=1 \
-    cargo test --release --locked --no-default-features --features max-pure
+  _env
+  cargo test --release --locked --no-default-features --features max-pure
 }
 
 package() {
-  cd "${srcdir}/${_realname}-${pkgver}"
+  cd "${_realname}"
 
-  LIBSQLITE3_SYS_USE_PKG_CONFIG=1 \
+  _env
   cargo install \
     --frozen \
     --offline \
