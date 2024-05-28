@@ -44,7 +44,6 @@ pkgver() {
 }
 
 _env() {
-  export LIBZ_SYS_STATIC=0
   export OPENSSL_NO_VENDOR=1
   export PKG_CONFIG_ALL_DYNAMIC=1
   export WINAPI_NO_BUNDLED_LIBRARIES=1
