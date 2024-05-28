@@ -1,0 +1,24 @@
+From e4d2efce5aa34b32d3dc9ed1563eabbab438961a Mon Sep 17 00:00:00 2001
+From: Maksim Bondarenkov <maksapple2306@gmail.com>
+Date: Tue, 28 May 2024 19:15:52 +0300
+Subject: [PATCH] allow dynamic linking of bzip2
+
+---
+ bzip2-sys/build.rs | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/bzip2-sys/build.rs b/bzip2-sys/build.rs
+index feb004ca..04d926b5 100644
+--- a/bzip2-sys/build.rs
++++ b/bzip2-sys/build.rs
+@@ -12,7 +12,9 @@ fn main() {
+     if target.contains("windows") {
+         cfg.define("_WIN32", None);
+         cfg.define("BZ_EXPORT", None);
+-    } else if !cfg!(feature = "static") {
++    }
++
++    if !target.contains("msvc") {
+         // pkg-config doesn't guarantee static link
+         if pkg_config::Config::new()
+             .cargo_metadata(true)

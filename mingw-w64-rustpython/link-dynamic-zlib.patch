@@ -1,0 +1,23 @@
+--- a/build.rs
++++ b/build.rs
+@@ -21,10 +21,7 @@ fn main() {
+     // also don't run pkg-config on macOS/FreeBSD/DragonFly. That'll end up printing
+     // `-L /usr/lib` which wreaks havoc with linking to an OpenSSL in /usr/local/lib
+     // (Homebrew, Ports, etc.)
+-    let want_static =
+-        cfg!(feature = "static") || env::var("LIBZ_SYS_STATIC").unwrap_or(String::new()) == "1";
+-    if !want_static &&
+-       !target.contains("msvc") && // pkg-config just never works here
++    if !target.contains("msvc") && // pkg-config just never works here
+        !(host_and_target_contain("apple") ||
+          host_and_target_contain("freebsd") ||
+          host_and_target_contain("dragonfly"))
+@@ -71,8 +68,6 @@ fn main() {
+     let cross_compiling = target != host;
+     let apple_to_apple = host.contains("-apple-") && target.contains("-apple-");
+     if target.contains("msvc")
+-        || target.contains("pc-windows-gnu")
+-        || want_static
+         || (cross_compiling && !apple_to_apple)
+     {
+         return build_zlib(&mut cfg, &target);

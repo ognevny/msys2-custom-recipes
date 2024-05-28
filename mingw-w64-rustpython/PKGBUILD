@@ -1,31 +1,42 @@
 # Maintainer: Maksim Bondarenkov <maksapple2306@gmail.com>
 
+_bzip2_sys_ver='0.1.11+1.0.8'
+_libz_sys_ver=1.1.8
+
 _realname=rustpython
-_commit=940b879950171a70a20de55d5745920af79cab27
+_commit=7996a10116681e9f85eda03413d5011b805e577f
 pkgbase=mingw-w64-${_realname}
 pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}"
-pkgver=r13661.940b87995
+pkgver=r13794.7996a1011
 pkgrel=1
 pkgdesc="A Python Interpreter written in Rust (mingw-w64)"
 arch=('any')
 mingw_arch=('mingw64' 'ucrt64' 'clang64' 'clangarm64')
 url="https://github.com/RustPython/RustPython"
 license=('spdx:MIT')
+depends=("${MINGW_PACKAGE_PREFIX}-openssl"
+         "${MINGW_PACKAGE_PREFIX}-zlib"
+         "${MINGW_PACKAGE_PREFIX}-libffi"
+         "${MINGW_PACKAGE_PREFIX}-bzip2")
 makedepends=("${MINGW_PACKAGE_PREFIX}-rust"
              "${MINGW_PACKAGE_PREFIX}-pkgconf"
              "${MINGW_PACKAGE_PREFIX}-python"
              "${MINGW_PACKAGE_PREFIX}-sqlite3"
              'git')
-depends=("${MINGW_PACKAGE_PREFIX}-openssl"
-         "${MINGW_PACKAGE_PREFIX}-zlib"
-         "${MINGW_PACKAGE_PREFIX}-libffi"
-         "${MINGW_PACKAGE_PREFIX}-bzip2")
 source=("${_realname}::git+${url}#commit=${_commit}"
-        "fix-pylib-path.patch"
-        "use-system-libs.patch")
-sha256sums=('SKIP'
-            'd114917f3eaeccaa63840f27aa086a7265c3a535f68d8f2e2409c18c796fe049'
-            '7f792966bf803cd602c15434d58a78bf5bea509cd66a572a01dfcbabc1cabe75')
+        "bzip2-sys-${_zstd_sys_ver}.tar.gz::https://crates.io/api/v1/crates/bzip2-sys/${_bzip2_sys_ver}/download"
+        "libz-sys-${_libz_sys_ver}.tar.gz::https://crates.io/api/v1/crates/libz-sys/${_libz_sys_ver}/download"
+        "link-dynamic-bzip.patch"
+        "link-dynamic-zlib.patch"
+        "use-vendored-deps.patch"
+        "fix-pylib-path.patch")
+sha256sums=('c8a213bfa21c473108e1cd3f2ac0a9f8d48366a2578ae4d312867699719b203e'
+            '736a955f3fa7875102d57c82b8cac37ec45224a07fd32d58f9f7a186b6cd4cdc'
+            '9702761c3935f8cc2f101793272e202c72b99da8f4224a19ddcf1279a6450bbf'
+            '35db3a89853afa5676cdff9374b248b7b4df6eebb2936f40f8d585d68ea5de2d'
+            '750bdbac02f0fd82a157ede696160836bb41ce127ceba66c4c6d8ef35fce1bae'
+            '0b639189fd0a7614d1c9bda7a0cfdbabf655792dd4b319a5742bc4a53b92a7b4'
+            'd114917f3eaeccaa63840f27aa086a7265c3a535f68d8f2e2409c18c796fe049')
 
 pkgver() {
   cd "${srcdir}/${_realname}"
@@ -44,17 +55,13 @@ prepare() {
   cd "${srcdir}/${_realname}"
   patch -Np1 -i "${srcdir}/fix-pylib-path.patch"
 
-  cargo vendor --locked --versioned-dirs
-  cat >> .cargo/config.toml <<END
+  patch -Np1 -i "${srcdir}/use-vendored-deps.patch"
+  patch -d "../bzip2-sys-${_bzip2_sys_ver}" -i "${srcdir}/link-dynamic-bzip.patch"
+  patch -d "../libz-sys-${_libz_sys_ver}" -i "${srcdir}/link-dynamic-zlib.patch"
+  sed -i 's/^libffi = "3.1.0"$/libffi = { version = "3.1.0", features = ["system"] }/' jit/Cargo.toml
 
-[source.crates-io]
-replace-with = "vendored-sources"
-
-[source.vendored-sources]
-directory = "vendor"
-END
-
-  patch -Np1 -i "${srcdir}/use-system-libs.patch"
+  cargo update -p bzip2-sys -p libz-sys
+  cargo fetch --locked --target "$(rustc -vV | sed -n 's/host: //p')"
 }
 
 build() {
