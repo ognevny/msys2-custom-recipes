@@ -1,13 +1,10 @@
 # Maintainer: Maksim Bondarenkov <maksapple2306@gmail.com>
 
-_bzip2_sys_ver='0.1.11+1.0.8'
-_libz_sys_ver=1.1.8
-
 _realname=rustpython
-_commit=7996a10116681e9f85eda03413d5011b805e577f
+_commit=a620b38ba0781ea20d2d9bfbb1c432de7e713982
 pkgbase=mingw-w64-${_realname}
 pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}"
-pkgver=r13794.7996a1011
+pkgver=r13808.a620b38ba
 pkgrel=1
 pkgdesc="A Python Interpreter written in Rust (mingw-w64)"
 arch=('any')
@@ -24,18 +21,16 @@ makedepends=("${MINGW_PACKAGE_PREFIX}-rust"
              "${MINGW_PACKAGE_PREFIX}-sqlite3"
              'git')
 source=("${_realname}::git+${url}#commit=${_commit}"
-        "bzip2-sys-${_zstd_sys_ver}.tar.gz::https://crates.io/api/v1/crates/bzip2-sys/${_bzip2_sys_ver}/download"
-        "libz-sys-${_libz_sys_ver}.tar.gz::https://crates.io/api/v1/crates/libz-sys/${_libz_sys_ver}/download"
+        "bzip2-sys.tar.gz::https://crates.io/api/v1/crates/bzip2-sys/0.1.11+1.0.8/download"
+        "libz-sys.tar.gz::https://crates.io/api/v1/crates/libz-sys/1.1.8/download"
         "link-dynamic-bzip.patch"
         "link-dynamic-zlib.patch"
-        "use-vendored-deps.patch"
         "fix-pylib-path.patch")
-sha256sums=('c8a213bfa21c473108e1cd3f2ac0a9f8d48366a2578ae4d312867699719b203e'
+sha256sums=('059abee548f828f563805d552cb272f45da19ce0f137986174ee6c1a46fc5c99'
             '736a955f3fa7875102d57c82b8cac37ec45224a07fd32d58f9f7a186b6cd4cdc'
             '9702761c3935f8cc2f101793272e202c72b99da8f4224a19ddcf1279a6450bbf'
             '35db3a89853afa5676cdff9374b248b7b4df6eebb2936f40f8d585d68ea5de2d'
-            '750bdbac02f0fd82a157ede696160836bb41ce127ceba66c4c6d8ef35fce1bae'
-            '0b639189fd0a7614d1c9bda7a0cfdbabf655792dd4b319a5742bc4a53b92a7b4'
+            '50dce4223eba7a5c6ba6c51d8ccfd45039799a3b4408827a04349d03089b8817'
             'd114917f3eaeccaa63840f27aa086a7265c3a535f68d8f2e2409c18c796fe049')
 
 pkgver() {
@@ -54,9 +49,9 @@ prepare() {
   cd "${srcdir}/${_realname}"
   patch -Np1 -i "${srcdir}/fix-pylib-path.patch"
 
-  patch -Np1 -i "${srcdir}/use-vendored-deps.patch"
-  patch -d "../bzip2-sys-${_bzip2_sys_ver}" -i "${srcdir}/link-dynamic-bzip.patch"
-  patch -d "../libz-sys-${_libz_sys_ver}" -i "${srcdir}/link-dynamic-zlib.patch"
+  sed -i '/\[patch\.crates-io\]/a bzip2-sys = { path = "../bzip2-sys-0.1.11+1.0.8" }\nlibz-sys = { path = "../libz-sys-1.1.8" }' Cargo.toml
+  patch -d "../bzip2-sys-0.1.11+1.0.8" -i "${srcdir}/link-dynamic-bzip.patch"
+  patch -d "../libz-sys-1.1.8" -i "${srcdir}/link-dynamic-zlib.patch"
   sed -i 's/^libffi = "3.1.0"$/libffi = { version = "3.1.0", features = ["system"] }/' jit/Cargo.toml
 
   cargo update -p bzip2-sys -p libz-sys
