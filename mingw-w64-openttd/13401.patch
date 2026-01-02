@@ -1,0 +1,49 @@
+From 34377820bbf11eb0d8e73402ee43bc21dab89123 Mon Sep 17 00:00:00 2001
+From: Charles Pigott <charlespigott@googlemail.com>
+Date: Tue, 28 Jan 2025 18:41:01 +0000
+Subject: [PATCH 1/2] Codechange: [CMake] Enable FHS handling by default for
+ MinGW
+
+---
+ cmake/Options.cmake | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/cmake/Options.cmake b/cmake/Options.cmake
+index 38d708c717bcd..fef4014a2895d 100644
+--- a/cmake/Options.cmake
++++ b/cmake/Options.cmake
+@@ -46,7 +46,7 @@ endfunction()
+ function(set_options)
+     option(OPTION_PACKAGE_DEPENDENCIES "Copy dependencies into lib/ for easy packaging (Linux only)" OFF)
+ 
+-    if(UNIX AND NOT APPLE AND NOT OPTION_PACKAGE_DEPENDENCIES)
++    if(((UNIX AND NOT APPLE) OR MINGW) AND NOT OPTION_PACKAGE_DEPENDENCIES)
+         set(DEFAULT_OPTION_INSTALL_FHS ON)
+     else()
+         set(DEFAULT_OPTION_INSTALL_FHS OFF)
+
+From 48a29fdc44d4d96cbea628cd544904c3f857bcd5 Mon Sep 17 00:00:00 2001
+From: Charles Pigott <charlespigott@googlemail.com>
+Date: Tue, 28 Jan 2025 18:41:25 +0000
+Subject: [PATCH 2/2] Codechange: [CMake] Add specific MinGW handling of
+ directory paths
+
+---
+ cmake/Options.cmake | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/cmake/Options.cmake b/cmake/Options.cmake
+index fef4014a2895d..bfacb0205e454 100644
+--- a/cmake/Options.cmake
++++ b/cmake/Options.cmake
+@@ -9,6 +9,10 @@ function(set_directory_options)
+         set(DEFAULT_PERSONAL_DIR "Documents/OpenTTD")
+         set(DEFAULT_SHARED_DIR "/Library/Application Support/OpenTTD")
+         set(DEFAULT_GLOBAL_DIR "(not set)")
++    elseif(MINGW)
++        set(DEFAULT_PERSONAL_DIR "OpenTTD")
++        set(DEFAULT_SHARED_DIR "(not set)")
++        set(DEFAULT_GLOBAL_DIR "${CMAKE_INSTALL_FULL_DATADIR}/${BINARY_NAME}")
+     elseif(WIN32)
+         set(DEFAULT_PERSONAL_DIR "OpenTTD")
+         set(DEFAULT_SHARED_DIR "(not set)")

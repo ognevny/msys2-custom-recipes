@@ -1,0 +1,65 @@
+# Maintainer: Maksim Bondarenkov <maksapple2306@gmail.com>
+
+_realname=openttd
+pkgbase=mingw-w64-${_realname}
+pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}"
+pkgver=15.0
+pkgrel=1
+pkgdesc="Open Transport Tycoon Deluxe game (mingw-w64)"
+arch=('any')
+mingw_arch=('ucrt64' 'clang64')
+url='https://www.openttd.org'
+msys2_repository_url='https://github.com/OpenTTD/OpenTTD'
+license=('spdx:GPL-2.0-or-later')
+depends=( "${MINGW_PACKAGE_PREFIX}-gcc-libs"
+         "${MINGW_PACKAGE_PREFIX}-libpng"
+         "${MINGW_PACKAGE_PREFIX}-lzo2"
+         "${MINGW_PACKAGE_PREFIX}-opusfile"
+         "${MINGW_PACKAGE_PREFIX}-xz"
+         "${MINGW_PACKAGE_PREFIX}-zlib")
+makedepends=("${MINGW_PACKAGE_PREFIX}-cc"
+             "${MINGW_PACKAGE_PREFIX}-cmake"
+             "${MINGW_PACKAGE_PREFIX}-ninja"
+             "${MINGW_PACKAGE_PREFIX}-pkgconf")
+source=("https://github.com/OpenTTD/OpenTTD/archive/${pkgver}/${_realname}-${pkgver}.tar.gz"
+        "https://github.com/OpenTTD/OpenTTD/pull/13401.patch"
+        "link-shared-libraries.patch")
+sha256sums=('bd86ce4e9691809e45869d10e3799fbe1e5facaaf57e1e65830a5ec66ed28400'
+            'a8d97986b3df924d7061a27c0e967ab3bd10bbdb96458c49be809003c082ca3d'
+            '8f29397a3f22e4cbe99ecf42bd6e90b9732b9304155fba070bbd7b317c651ceb')
+
+prepare() {
+  cd OpenTTD-${pkgver}
+
+  patch -Np1 -i ../link-shared-libraries.patch
+  # https://github.com/OpenTTD/OpenTTD/pull/13401
+  patch -Np1 -i ../13401.patch
+}
+
+build() {
+  declare -a extra_config
+  if check_option "debug" "n"; then
+    extra_config+=("-DCMAKE_BUILD_TYPE=Release")
+  else
+    extra_config+=("-DCMAKE_BUILD_TYPE=Debug")
+  fi
+
+  MSYS2_ARG_CONV_EXCL="-DCMAKE_INSTALL_PREFIX=" \
+    cmake \
+      -Wno-dev \
+      -GNinja \
+      -DCMAKE_INSTALL_PREFIX="${MINGW_PREFIX}" \
+      -DCMAKE_INSTALL_DATADIR="$(cygpath -w ${MINGW_PREFIX}/share)" \
+      -DCMAKE_INSTALL_BINDIR=bin \
+      "${extra_config[@]}" \
+      -S OpenTTD-${pkgver} \
+      -B "build-${MSYSTEM}"
+
+  cmake --build "build-${MSYSTEM}"
+}
+
+package() {
+  DESTDIR="${pkgdir}" cmake --install "build-${MSYSTEM}"
+
+  install -Dm644 OpenTTD-${pkgver}/COPYING.md "${pkgdir}${MINGW_PREFIX}/share/licenses/${_realname}/COPYING.md"
+}
