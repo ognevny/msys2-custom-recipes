@@ -1,0 +1,45 @@
+# Maintainer: Maksim Bondarenkov <maksapple2306@gmail.com>
+
+_realname=rusty-autoclicker-git
+pkgbase=mingw-w64-${_realname}
+pkgname=${MINGW_PACKAGE_PREFIX}-${_realname}
+pkgver=v2.4.0.r4.g068430b
+pkgrel=1
+pkgdesc="A pure Rust portable auto clicker built for Linux, macOS & Windows (mingw-w64)"
+arch=('any')
+mingw_arch=('ucrt64' 'clang64' 'clangarm64')
+url="https://github.com/MrTanoshii/rusty-autoclicker"
+license=('spdx:CC0')
+makedepends=("${MINGW_PACKAGE_PREFIX}-rust" 'git')
+provides=("${pkgname%-git}")
+conflicts=("${pkgname%-git}")
+options=('!strip')
+source=('git+https://github.com/MrTanoshii/rusty-autoclicker.git'
+        "mingw-build.patch")
+sha256sums=('SKIP'
+            'f3d81b92b3c1ee091dc60ab862c719cc4f53926f732201566fc466834b0cb795')
+
+pkgver() {
+	cd "${_realname%-git}"
+  git describe --long --tags --abbrev=7 | sed 's/\([^-]*-g\)/r\1/;s/-/./g'
+}
+
+prepare() {
+  cd "${_realname%-git}"
+
+  patch -p1 -i ../mingw-build.patch
+
+  cargo fetch --target "${RUST_CHOST}"
+}
+
+build() {
+	cd "${_realname%-git}"
+
+  cargo build --frozen --release
+}
+
+package() {
+	cd "${_realname%-git}"
+
+  install -Dm755 target/release/${_realname%-git} "${pkgdir}${MINGW_PREFIX}/bin/${_realname%-git}"
+}
