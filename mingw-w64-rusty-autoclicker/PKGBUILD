@@ -3,7 +3,7 @@
 _realname=rusty-autoclicker-git
 pkgbase=mingw-w64-${_realname}
 pkgname=${MINGW_PACKAGE_PREFIX}-${_realname}
-pkgver=v2.4.0.r4.g068430b
+pkgver=v2.4.0.r9.g806ca4e
 pkgrel=1
 pkgdesc="A pure Rust portable auto clicker built for Linux, macOS & Windows (mingw-w64)"
 arch=('any')
@@ -14,10 +14,8 @@ makedepends=("${MINGW_PACKAGE_PREFIX}-rust" 'git')
 provides=("${pkgname%-git}")
 conflicts=("${pkgname%-git}")
 options=('!strip')
-source=('git+https://github.com/MrTanoshii/rusty-autoclicker.git'
-        "mingw-build.patch")
-sha256sums=('SKIP'
-            'f3d81b92b3c1ee091dc60ab862c719cc4f53926f732201566fc466834b0cb795')
+source=('git+https://github.com/MrTanoshii/rusty-autoclicker.git')
+sha256sums=('SKIP')
 
 pkgver() {
 	cd "${_realname%-git}"
@@ -27,9 +25,7 @@ pkgver() {
 prepare() {
   cd "${_realname%-git}"
 
-  patch -p1 -i ../mingw-build.patch
-
-  cargo fetch --target "${RUST_CHOST}"
+  cargo fetch --locked --target "${RUST_CHOST}"
 }
 
 build() {
