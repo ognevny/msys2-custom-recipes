@@ -7,7 +7,7 @@ pkgver=1.2.0rust # there is also node implementation
 pkgrel=1
 pkgdesc='Sexy ANSI fonts for the console (mingw-w64)'
 arch=('any')
-mingw_arch=('mingw64' 'ucrt64' 'clang64' 'clangarm64')
+mingw_arch=('ucrt64' 'clang64' 'clangarm64')
 msys2_references=(
   'aur: cfonts'
 )

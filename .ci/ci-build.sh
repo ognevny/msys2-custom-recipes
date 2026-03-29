@@ -123,6 +123,9 @@ pacman -Sy
 # Remove git and python
 pacman -R --recursive --unneeded --noconfirm --noprogressbar git python
 
+# Install ntldd
+pacman -S --needed --noconfirm ${MINGW_PACKAGE_PREFIX}-ntldd
+
 # Enable linting
 export MAKEPKG_LINT_PKGBUILD=1
 
@@ -149,7 +152,7 @@ for package in "${packages[@]}"; do
 
         echo "::group::[meta-diff] ${pkgname}"
         message "Package info diff for ${pkgname}"
-        diff -Nur <(pacman -Si ${MSYSTEM,,}/"${pkgname}") <(pacman -Qip "${pkg}") || true
+        diff -Nur <(pacman -Si ${MSYSTEM,,}/"${pkgname}" | sed '/Download Size/d') <(pacman -Qip "${pkg}" | sed '/Compressed Size/d') || true
         echo "::endgroup::"
 
         echo "::group::[file-diff] ${pkgname}"
@@ -163,7 +166,7 @@ for package in "${packages[@]}"; do
         if [ "${#binaries[@]}" -ne 0 ]; then
             for binary in ${binaries[@]}; do
                 echo "${binary}:"
-                ntldd -R ${binary} | grep -v "ext-ms\|api-ms\|WINDOWS\|Windows\|HvsiFileTrust\|wpaxholder\|ngcrecovery" || true
+                ntldd -R ${binary} | grep -v "ext-ms\|api-ms\|WINDOWS\|Windows\|HvsiFileTrust\|wpaxholder\|ngcrecovery\|AzureAttest\|PdmUtilities\|WTDSENSOR\|wtdccm\|SAMSRV\|LSASRV\|EDPCSP\|policymanagerprecheck\|dmenterprisediagnostics\|EFSCORE\|FVESKYBACKUP" || true
             done
         fi
         echo "::endgroup::"
