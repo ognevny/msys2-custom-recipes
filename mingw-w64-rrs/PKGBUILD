@@ -1,0 +1,80 @@
+# Maintainer: Maksim Bondarenkov <maksapple2306@gmail.com>
+
+_realname=rrs
+pkgbase=mingw-w64-${_realname}
+pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}"
+pkgver=1.9.1
+pkgrel=1
+pkgdesc="Russian Railway Simulator (mingw-w64)"
+arch=('any')
+mingw_arch=('ucrt64' 'clang64' 'clangarm64')
+url='https://rusrailsim.ru'
+msys2_repository_url='https://github.com/maisvendoo/RRS'
+license=('LICENSE')
+install=rrs-${MSYSTEM}.install
+depends=("${MINGW_PACKAGE_PREFIX}-cc-libs"
+         "${MINGW_PACKAGE_PREFIX}-qt6-base"
+         "${MINGW_PACKAGE_PREFIX}-qt6-serialbus"
+         "${MINGW_PACKAGE_PREFIX}-vulkanscenegraph"
+         "${MINGW_PACKAGE_PREFIX}-vsgxchange"
+         "${MINGW_PACKAGE_PREFIX}-vsgimgui"
+         "${MINGW_PACKAGE_PREFIX}-glslang"
+         "${MINGW_PACKAGE_PREFIX}-openal"
+         "${MINGW_PACKAGE_PREFIX}-freetype"
+         "${MINGW_PACKAGE_PREFIX}-assimp"
+         "${MINGW_PACKAGE_PREFIX}-sfml"
+         "${MINGW_PACKAGE_PREFIX}-lua54"
+         "${MINGW_PACKAGE_PREFIX}-sol2")
+makedepends=("${MINGW_PACKAGE_PREFIX}-cc"
+             "${MINGW_PACKAGE_PREFIX}-cmake"
+             "${MINGW_PACKAGE_PREFIX}-ninja"
+             "${MINGW_PACKAGE_PREFIX}-qt6-tools"
+             "${MINGW_PACKAGE_PREFIX}-shaderc")
+source=("${msys2_repository_url}/archive/refs/tags/v${pkgver}/${_realname^^}-${pkgver}.tar.gz"
+        "fix-lua-finding.patch"
+        "install.sh")
+sha256sums=('7e5a87fae2db71973c6441a0954be0fb183a86751b366821faff08041c626308'
+            'eb61f9f3b4c4e83a6798a4a05eeb753be30ed6c91576cc0fabfcada05829768f'
+            'ec1e4f7abf52e35f04843853a6a9c24867950fd7f3b7799095956388b232cecd')
+
+prepare() {
+  cd "${_realname^^}-${pkgver}"
+
+  patch -p1 -i ../fix-lua-finding.patch
+
+  cp -a ../install.sh scripts/
+}
+
+build() {
+  declare -a extra_config
+  if check_option "debug" "n"; then
+    extra_config+=("-DCMAKE_BUILD_TYPE=Release")
+  else
+    extra_config+=("-DCMAKE_BUILD_TYPE=Debug")
+  fi
+
+  CFLAGS+=" -Wno-incompatible-pointer-types" \
+  MSYS2_ARG_CONV_EXCL="-DCMAKE_INSTALL_PREFIX=" \
+    cmake \
+      -GNinja \
+      -DCMAKE_INSTALL_PREFIX="${MINGW_PREFIX}/opt/rrs" \
+      "${extra_config[@]}" \
+      -S "${_realname^^}-${pkgver}" \
+      -B "build-${MSYSTEM}"
+
+  cmake --build "build-${MSYSTEM}"
+}
+
+check() {
+  cmake --build "build-${MSYSTEM}" --target test
+}
+
+package() {
+  # install SDK
+  DESTDIR="${pkgdir}" cmake --install "build-${MSYSTEM}"
+  # install main game files
+  cd "${_realname}-${pkgver}/scripts"
+  RRS_DEV_ROOT="${pkgdir}${MINGW_PREFIX}/opt/rrs" sh install.sh
+
+  install -Dm644 "../LICENSE" "${pkgdir}${MINGW_PREFIX}/share/licenses/${_realname}/LICENSE"
+}
