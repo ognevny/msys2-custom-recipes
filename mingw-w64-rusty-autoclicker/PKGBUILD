@@ -14,8 +14,8 @@ makedepends=("${MINGW_PACKAGE_PREFIX}-rust" 'git')
 provides=("${pkgname%-git}")
 conflicts=("${pkgname%-git}")
 options=('!strip')
-source=('git+https://github.com/MrTanoshii/rusty-autoclicker.git')
-sha256sums=('SKIP')
+source=('git+https://github.com/MrTanoshii/rusty-autoclicker.git#commit=806ca4e9e8faf029bb5f5e4afa1dddc686d8b52d')
+sha256sums=('688f8fb06dde1efdc3c39df631eca9e25d387824b48bca5aa4b7e69fe646f80f')
 
 pkgver() {
 	cd "${_realname%-git}"
